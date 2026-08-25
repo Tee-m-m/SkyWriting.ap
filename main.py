@@ -29,7 +29,10 @@ options = HandLandmarkerOptions(
 )
 
 #blank canvas
-canvas = np.zeros((480, 640, 3), dtype = np.uint8)
+canvas = None
+
+#Previous fingerprint position
+previous_point = None
 
 #Webcam
 cap = cv2.VideoCapture(0)
@@ -50,6 +53,9 @@ with HandLandmarker.create_from_options(options) as landmarker:
         if not success:
             print("Could not read the camera frame!")
             break
+
+        if canvas is None:
+            canvas = np.zeros_like(frame)
 
         #BGR to RGB
         rgb_frame = cv2.cvtColor(
@@ -103,6 +109,17 @@ with HandLandmarker.create_from_options(options) as landmarker:
 
             index_x = int(index_tip.x * frame.shape[1])
             index_y = int(index_tip.y * frame.shape[0])
+
+            current_point = (index_x, index_y)
+            if previous_point is not None:
+                cv2.line(
+                    canvas,
+                    previous_point,
+                    current_point,
+                    (255, 255, 255),
+                    5
+                )
+            previous_point = current_point
 
             #Highlight the index fingerprint
             cv2.circle(
