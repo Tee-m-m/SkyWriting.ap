@@ -76,6 +76,24 @@ with HandLandmarker.create_from_options(options) as landmarker:
                 2
             )
 
+            #taking the first detected hand
+            hand = result.hand_landmarks[0]
+
+            #Draw Landmarks
+            for landmark in hand:
+                #normalized cordinated to pixel cordinates
+                x = int(landmark.x * frame.shape[1])
+                y = int(landmark.y * frame.shape[0])
+
+                #Draw a circle at the landmark position
+                cv2.circle(
+                    frame,
+                    (x,y),
+                    5,
+                    (0,0,255),
+                    -1
+                )
+
         else:
             cv2.putText(
                 frame,
