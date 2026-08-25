@@ -1,46 +1,96 @@
 import cv2
 import mediapipe as mp
+import os
+import time
 
-mp_hands = mp.solutions.hands
-mp_drawing = mp.solutions.drawing_utils
+#Model path
+model_path = "models/hand_landmarker.task"
+if not os.path.exists(model_path):
+    print("Hand model not found!")
+    exit()
 
-hands = mp_hands.Hands(
-    static_image_mode = False,
-    max_num_hands = 1,
-    min_detection_confidence = 0.5,
-    min_tracking_confidence = 0.5
+print("Hand model found!")
+
+
+#Mediapipe setup
+BaseOptions = mp.tasks.BaseOptions
+VisionRunningMode = mp.tasks.vision.RunningMode
+
+HandLandmarker = mp.tasks.vision.HandLandmarker
+HandLandmarkerOptions = mp.tasks.vision.HandLandmarkerOptions
+
+options = HandLandmarkerOptions(
+    base_options = BaseOptions(
+        model_asset_path = model_path
+    ),
+    running_mode = VisionRunningMode.VIDEO,
+    num_hands = 1
 )
 
+#Webcam
 cap = cv2.VideoCapture(0)
 
-while True:
-    success, frame = cap.read()
+if not cap.isOpened():
+    print("Could not access the camera!")
+    exit()
 
-    if not success:
-        print("Could not access camera!")
-        break
+print("Camera started!")
+print("Show your hand to the camera.")
+print("Press 'e' to exit.")
 
-    #BGR to RGB
-    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+#Hand Landmarker
+with HandLandmarker.create_from_options(options) as landmarker:
+    while True:
+        success, frame = cap.read()
 
-    #hand detection
-    results = hands.process(rgb_frame)
+        if not success:
+            print("Could not read the camera frame!")
+            break
 
-    #Draw landmarks by hand detection
-    if results.multi_hand_landmarks:
-        for hand_landmarks in results.multi_hand_landmarks:
-            mp_drawing.draw_landmarks(
+        #BGR to RGB
+        rgb_frame = cv2.cvtColor(
+            frame,
+            cv2.COLOR_BGR2RGB
+        )
+
+        #frame to mediapipe image
+        mp_image = mp.Image(
+            image_format = mp.ImageFormat.SRGB,
+            data = rgb_frame
+        )
+        timestamp_ms = int(time.time() * 1000)
+
+        #Detect hands
+        result = landmarker.detect_for_video(
+            mp_image,
+            timestamp_ms
+        )
+        if result.hand_landmarkrs:
+            cv2.putText(
                 frame,
-                hand_landmarks,
-                mp_hands.HAND_CONNECTIONS
+                "Hand Detected",
+                (20,50),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1,
+                (0, 255, 0),
+                2
             )
 
-    cv2.imshow("SkyWriting.ap - Hand Detection", frame)
+        else:
+            cv2.putText(
+                frame,
+                "No Hand Detected",
+                (20,50),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1,
+                (0, 0, 255),
+                2
+            )
 
-    #Press 'e' to exit the webcam
-    if cv2.waitKey(1) & 0xFF == ord("e"):
-        break
+        #Show webcam
+        cv2.imshow("SkyWriting.ap - Hand Detection", frame)
+        if cv2.waitKey(1) & 0xFF == ord("e"):
+            break
 
 cap.release()
 cv2.destroyAllWindows()
-hands.close()
