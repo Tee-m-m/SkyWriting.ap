@@ -2,6 +2,7 @@ import cv2
 import mediapipe as mp
 import os
 import time
+import numpy as np
 
 #Model path
 model_path = "models/hand_landmarker.task"
@@ -26,6 +27,9 @@ options = HandLandmarkerOptions(
     running_mode = VisionRunningMode.VIDEO,
     num_hands = 1
 )
+
+#blank canvas
+canvas = np.zeros((480, 640, 3), dtype = np.unit8)
 
 #Webcam
 cap = cv2.VideoCapture(0)
@@ -135,6 +139,8 @@ with HandLandmarker.create_from_options(options) as landmarker:
         cv2.imshow("SkyWriting.ap - Hand Detection", frame)
         if cv2.waitKey(1) & 0xFF == ord("e"):
             break
+
+        cv2.imshow("Drawing Canvas", canvas)
 
 cap.release()
 cv2.destroyAllWindows()
