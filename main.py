@@ -65,7 +65,7 @@ with HandLandmarker.create_from_options(options) as landmarker:
             mp_image,
             timestamp_ms
         )
-        if result.hand_landmarkrs:
+        if result.hand_landmarks:
             cv2.putText(
                 frame,
                 "Hand Detected",
