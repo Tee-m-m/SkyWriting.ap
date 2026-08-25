@@ -29,7 +29,7 @@ options = HandLandmarkerOptions(
 )
 
 #blank canvas
-canvas = np.zeros((480, 640, 3), dtype = np.unit8)
+canvas = np.zeros((480, 640, 3), dtype = np.uint8)
 
 #Webcam
 cap = cv2.VideoCapture(0)
