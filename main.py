@@ -94,6 +94,32 @@ with HandLandmarker.create_from_options(options) as landmarker:
                     -1
                 )
 
+            #Index fingertip landmark - 8
+            index_tip = hand[8]
+
+            index_x = int(index_tip.x * frame.shape[1])
+            index_y = int(index_tip.y * frame.shape[0])
+
+            #Highlight the index fingerprint
+            cv2.circle(
+                frame,
+                (index_x, index_y),
+                10,
+                (255, 0, 0),
+                -1
+            )
+
+            #Display the cordinates
+            cv2.putText(
+                frame,
+                f"index: ({index_x}, {index_y})",
+                (20,90),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.8,
+                (255, 255, 255),
+                2
+            )
+
         else:
             cv2.putText(
                 frame,
